@@ -3,15 +3,25 @@
 	import Input from '../input.svelte'
 	import { getInputErrors } from '../form.svelte'
 
-	type UIInputProps = Omit<BaseInputProps, 'error'>
+	type UIInputProps = Omit<BaseInputProps, 'error'> & {
+		label?: string
+	}
 
-	let { name, type = 'text', ...props }: UIInputProps = $props()
+	let { ref = $bindable(), name, type = 'text', label, ...props }: UIInputProps = $props()
 
 	let errors = $derived(getInputErrors(name))
 </script>
 
-<Input {name} {type} {...props} class="border" />
+<div class="space-y-2">
+	<label>
+		{#if label}
+			<span class="block text-sm font-medium mb-2">{label}</span>
+		{/if}
 
-{#if errors}
-	<p>{errors.map((e) => e.message).join(', ')}</p>
-{/if}
+		<Input bind:ref {name} {type} {...props} class="border" />
+	</label>
+
+	{#if errors}
+		<p class="text-red-500 text-sm">{errors.map((e) => e.message).join(', ')}</p>
+	{/if}
+</div>

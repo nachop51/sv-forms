@@ -14,6 +14,7 @@ const schema = v.object({
 	hobbies: v.array(v.string()),
 	is_subscribed: v.boolean(),
 	birth_date: v.pipe(v.string(), v.toDate()),
+	favorite_color: v.pipe(v.array(v.string()), v.minLength(1)),
 })
 
 export const exampleAction = form(schema, async (data) => {
