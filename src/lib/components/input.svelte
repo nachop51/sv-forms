@@ -4,7 +4,7 @@
 	import type { RemoteFormField } from '@sveltejs/kit'
 
 	export type BaseInputProps = HTMLInputAttributes & {
-		ref?: HTMLInputElement
+		ref?: HTMLInputElement | null
 		files?: FileList | null
 		name: string
 		type: Parameters<RemoteFormField<any>['as']>[0]

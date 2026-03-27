@@ -5,7 +5,7 @@
 	import type { BaseInputProps } from './input.svelte'
 
 	export type BaseSelectProps = HTMLSelectAttributes & {
-		ref?: HTMLSelectElement
+		ref?: HTMLSelectElement | null
 		files?: FileList | null
 		name: string
 		type: Extract<BaseInputProps['type'], 'select' | 'select multiple'>

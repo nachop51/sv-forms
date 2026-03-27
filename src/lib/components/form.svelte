@@ -1,4 +1,16 @@
 <script lang="ts" module>
+	import type { RemoteForm } from '@sveltejs/kit'
+	import type { HTMLFormAttributes } from 'svelte/elements'
+
+	export type BaseFormProps<T extends RemoteForm<any, any> = RemoteForm<any, any>> = Omit<
+		HTMLFormAttributes,
+		'action'
+	> & {
+		ref?: HTMLFormElement | null
+		children: Snippet
+		action: T
+	}
+
 	const [getFormAction, setFormAction] = createContext<() => RemoteForm<any, any> | undefined>()
 
 	function getFormContext() {
@@ -15,20 +27,13 @@
 </script>
 
 <script lang="ts" generics="T extends RemoteForm<any, any>">
-	import type { RemoteForm } from '@sveltejs/kit'
 	import { createContext, type Snippet } from 'svelte'
-	import type { HTMLFormAttributes } from 'svelte/elements'
 
-	type Props = Omit<HTMLFormAttributes, 'action'> & {
-		children: Snippet
-		action: T
-	}
-
-	let { children, action, ...props }: Props = $props()
+	let { ref = $bindable(), children, action, ...props }: BaseFormProps<T> = $props()
 
 	setFormAction(() => action)
 </script>
 
-<form {...props} {...action}>
+<form bind:this={ref} {...props} {...action}>
 	{@render children()}
 </form>
