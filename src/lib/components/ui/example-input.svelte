@@ -7,7 +7,14 @@
 		label?: string
 	}
 
-	let { ref = $bindable(), name, type = 'text', label, ...props }: UIInputProps = $props()
+	let {
+		ref = $bindable(),
+		value = $bindable(),
+		name,
+		type = 'text',
+		label,
+		...props
+	}: UIInputProps = $props()
 
 	let errors = $derived(getInputErrors(name))
 </script>
@@ -18,7 +25,7 @@
 			<span class="block text-sm font-medium mb-2">{label}</span>
 		{/if}
 
-		<Input bind:ref {name} {type} {...props} class="border" />
+		<Input bind:ref bind:value {name} {type} {...props} class="border" />
 	</label>
 
 	{#if errors}

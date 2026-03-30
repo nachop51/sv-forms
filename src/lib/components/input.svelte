@@ -2,6 +2,7 @@
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	import type { HTMLInputAttributes } from 'svelte/elements'
 	import type { RemoteFormField } from '@sveltejs/kit'
+	import { getFormContext } from './form.svelte'
 
 	export type BaseInputProps = HTMLInputAttributes & {
 		ref?: HTMLInputElement | null
@@ -9,7 +10,6 @@
 		name: string
 		type: Parameters<RemoteFormField<any>['as']>[0]
 	}
-	import { getFormContext } from './form.svelte'
 
 	let {
 		ref = $bindable(),
