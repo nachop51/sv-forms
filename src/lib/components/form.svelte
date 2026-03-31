@@ -1,7 +1,8 @@
 <script lang="ts" module>
-	import { createContext, type Snippet } from 'svelte'
+	import { getContext, setContext, type Snippet } from 'svelte'
 	import type { RemoteForm, RemoteQuery, RemoteQueryOverride } from '@sveltejs/kit'
 	import type { HTMLFormAttributes } from 'svelte/elements'
+	import { FORM_CONTEXT_KEY } from '$lib/consts.js'
 
 	export type EnhanceFn = <T>(opts: {
 		form: HTMLFormElement
@@ -11,8 +12,9 @@
 		}
 	}) => void | Promise<void>
 
-	type DefinedUnlessExactlyUndefined<T> =
-		[T] extends [undefined] ? undefined : Exclude<T, undefined>
+	type DefinedUnlessExactlyUndefined<T> = [T] extends [undefined]
+		? undefined
+		: Exclude<T, undefined>
 
 	export type BaseFormProps<T extends RemoteForm<any, any> = RemoteForm<any, any>> = Omit<
 		HTMLFormAttributes,
@@ -86,10 +88,8 @@
 			  }
 		)
 
-	const [getFormAction, setFormAction] = createContext<() => RemoteForm<any, any> | undefined>()
-
 	function getFormContext() {
-		const formContext = getFormAction()
+		const formContext = getContext(FORM_CONTEXT_KEY) as () => RemoteForm<any, any> | undefined
 		return formContext ? formContext() : undefined
 	}
 
@@ -114,7 +114,7 @@
 		...props
 	}: BaseFormProps<T> = $props()
 
-	setFormAction(() => action)
+	setContext(FORM_CONTEXT_KEY, () => action)
 
 	const defaultEnhance: EnhanceFn = async ({ form, submit }) => {
 		try {

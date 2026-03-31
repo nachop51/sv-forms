@@ -21,14 +21,10 @@
 	}: BaseSelectProps = $props()
 
 	const formContext = getFormContext()
+
+	const selectCtxFormProps = $derived(formContext?.fields[name]?.as(type as any, value) ?? {})
 </script>
 
-<select
-	bind:value
-	bind:this={ref}
-	{name}
-	{...formContext?.fields[name]?.as(type as any)}
-	{...restProps}
->
+<select bind:value bind:this={ref} {name} {...selectCtxFormProps} {...restProps}>
 	{@render children?.()}
 </select>

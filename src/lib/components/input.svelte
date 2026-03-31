@@ -4,11 +4,11 @@
 	import type { RemoteFormField } from '@sveltejs/kit'
 	import { getFormContext } from './form.svelte'
 
-	export type BaseInputProps = HTMLInputAttributes & {
+	export type BaseInputProps = Omit<HTMLInputAttributes, 'type'> & {
 		ref?: HTMLInputElement | null
 		files?: FileList | null
 		name: string
-		type: Parameters<RemoteFormField<any>['as']>[0]
+		type?: Parameters<RemoteFormField<any>['as']>[0]
 	}
 
 	let {
@@ -22,6 +22,8 @@
 	}: BaseInputProps = $props()
 
 	const formContext = getFormContext()
+
+	const inputCtxFormProps = $derived(formContext?.fields[name]?.as(type as any, value) ?? {})
 </script>
 
 {#if type === 'file'}
@@ -29,26 +31,13 @@
 		bind:this={ref}
 		{name}
 		bind:value
-		{...formContext?.fields[name]?.as(type as any, value)}
+		{...inputCtxFormProps}
 		type="file"
 		{...props}
 		bind:files
 	/>
 {:else if type === 'checkbox'}
-	<input
-		bind:this={ref}
-		type="checkbox"
-		bind:checked
-		{name}
-		{...formContext?.fields[name]?.as(type as any, value)}
-		{...props}
-	/>
+	<input bind:this={ref} type="checkbox" bind:checked {name} {...inputCtxFormProps} {...props} />
 {:else}
-	<input
-		bind:this={ref}
-		bind:value
-		{name}
-		{...formContext?.fields[name]?.as(type as any, value)}
-		{...props}
-	/>
+	<input bind:this={ref} bind:value {name} {...inputCtxFormProps} {...props} />
 {/if}
