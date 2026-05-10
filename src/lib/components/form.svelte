@@ -102,42 +102,32 @@
 </script>
 
 <script lang="ts" generics="T extends RemoteForm<any, any>">
-	let {
-		ref = $bindable(),
-		children,
-		action,
-		enhance,
-		resetForm = true,
-		onfailure,
-		onsuccess,
-		removeDefaultEnhance,
-		...props
-	}: BaseFormProps<T> = $props()
+	let { ref = $bindable(), children, action, ...props }: BaseFormProps<T> = $props()
 
 	setContext(FORM_CONTEXT_KEY, () => action)
 
 	const defaultEnhance: EnhanceFn = async ({ form, submit }) => {
 		try {
 			await submit()
-			if (resetForm) form.reset()
+			if (props?.resetForm) form.reset()
 
 			let issues = action.fields.allIssues()
 			if (issues?.length ?? 0 > 0) {
-				onfailure?.(issues)
+				props?.onfailure?.(issues)
 			} else {
-				onsuccess?.(action.result)
+				props?.onsuccess?.(action.result)
 			}
 		} catch (error) {
-			onfailure?.(error)
+			props?.onfailure?.(error)
 		}
 	}
 
 	let formAction = $derived.by(() => {
-		if (removeDefaultEnhance) return action
+		if (props?.removeDefaultEnhance) return action
 
-		const enhanceFn = enhance ?? defaultEnhance
+		const enhanceFn = props?.enhance ?? defaultEnhance
 
-		return action.enhance(enhanceFn)
+		return action?.enhance(enhanceFn)
 	})
 </script>
 
