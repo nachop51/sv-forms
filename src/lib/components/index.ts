@@ -1,4 +1,5 @@
 import Form, {
+	type AnyRemoteForm,
 	type BaseFormProps,
 	type EnhanceFn,
 	getFormContext,
@@ -11,6 +12,7 @@ export {
 	Form,
 	Input,
 	Select,
+	type AnyRemoteForm,
 	type EnhanceFn,
 	type BaseFormProps,
 	type BaseInputProps,

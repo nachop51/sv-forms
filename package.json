@@ -1,6 +1,14 @@
 {
 	"name": "sv-forms",
-	"version": "0.0.10",
+	"version": "0.1.0",
+	"description": "Thin Svelte components over SvelteKit remote form functions: <Form>, <Input> and <Select> wired to a form's fields, issues and result.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nachop51/sv-forms.git"
+	},
+	"homepage": "https://github.com/nachop51/sv-forms#readme",
+	"bugs": "https://github.com/nachop51/sv-forms/issues",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && bun prepack",
@@ -14,14 +22,14 @@
 		"test:unit": "vitest",
 		"test": "bun run test:unit -- --run && bun run test:e2e",
 		"test:e2e": "playwright test",
-		"pub": "bun publish"
+		"pub": "bun run prepack && bun publish --ignore-scripts"
 	},
 	"files": [
 		"dist",
+		"LICENSE",
+		"README.md",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*",
-		"!dist/vitest-examples/**",
-		"!dist/components/ui/**"
+		"!dist/**/*.spec.*"
 	],
 	"sideEffects": [
 		"**/*.css"
@@ -35,7 +43,11 @@
 			"svelte": "./dist/index.js"
 		}
 	},
+	"dependencies": {
+		"esm-env": "^1.2.2"
+	},
 	"peerDependencies": {
+		"@sveltejs/kit": ">=2.61.0 <3",
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
@@ -43,7 +55,7 @@
 		"@eslint/js": "^9.39.2",
 		"@playwright/test": "^1.58.2",
 		"@sveltejs/adapter-auto": "^7.0.0",
-		"@sveltejs/kit": "^2.50.2",
+		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/package": "^2.5.7",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/vite": "^4.2.2",
@@ -69,6 +81,10 @@
 		"vitest-browser-svelte": "^2.0.2"
 	},
 	"keywords": [
-		"svelte"
+		"svelte",
+		"sveltekit",
+		"forms",
+		"remote-functions",
+		"validation"
 	]
 }

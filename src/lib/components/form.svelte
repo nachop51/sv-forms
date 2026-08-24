@@ -1,27 +1,48 @@
 <script lang="ts" module>
 	import { getContext, setContext, type Snippet } from 'svelte'
-	import type { RemoteForm, RemoteQuery, RemoteQueryOverride } from '@sveltejs/kit'
+	import { DEV } from 'esm-env'
+	import type { RemoteForm, RemoteFormIssue } from '@sveltejs/kit'
 	import type { HTMLFormAttributes } from 'svelte/elements'
 	import { FORM_CONTEXT_KEY } from '$lib/consts.js'
 
-	export type EnhanceFn = <T>(opts: {
-		form: HTMLFormElement
-		data: T
-		submit: () => Promise<void> & {
-			updates: (...queries: Array<RemoteQuery<any> | RemoteQueryOverride>) => Promise<void>
+	/**
+	 * The bound for the `action` prop: permissive enough to accept both a `RemoteForm` and the
+	 * `Omit<RemoteForm, 'for'>` returned by `action.for(id)`.
+	 *
+	 * This is only a constraint — the actual type is inferred from the `action` you pass, so
+	 * `fields`, `result` and the `enhance` callback all stay fully typed at the call site.
+	 */
+	export type AnyRemoteForm = {
+		method: 'POST'
+		action: string
+		fields: any
+		get result(): any
+		enhance(callback: (form: any) => any): {
+			method: 'POST'
+			action: string
+			[attachment: symbol]: (node: HTMLFormElement) => void
 		}
-	}) => void | Promise<void>
+	}
+
+	export type EnhanceFn<T extends AnyRemoteForm = AnyRemoteForm> = Parameters<T['enhance']>[0]
 
 	type DefinedUnlessExactlyUndefined<T> = [T] extends [undefined]
 		? undefined
 		: Exclude<T, undefined>
 
-	export type BaseFormProps<T extends RemoteForm<any, any> = RemoteForm<any, any>> = Omit<
+	// `children` is omitted alongside `action` because `HTMLFormAttributes` types it as a
+	// parameterless `Snippet`, which would intersect with — rather than replace — the one below.
+	export type BaseFormProps<T extends AnyRemoteForm = AnyRemoteForm> = Omit<
 		HTMLFormAttributes,
-		'action'
+		'action' | 'children'
 	> & {
 		ref?: HTMLFormElement | null
-		children: Snippet
+		/**
+		 * The form's content. Receives the `action` you passed, so nested markup can read
+		 * `form.pending`, call `form.validate()` or reach `form.fields` without importing the remote
+		 * function again.
+		 */
+		children: Snippet<[T]>
 		action: T
 	} & (
 			| {
@@ -73,7 +94,7 @@
 					resetForm?: boolean
 			  }
 			| {
-					enhance: EnhanceFn
+					enhance: EnhanceFn<T>
 					onsuccess?: never
 					onfailure?: never
 					removeDefaultEnhance?: never
@@ -88,49 +109,105 @@
 			  }
 		)
 
+	/**
+	 * The `<Form>` instance this component is inside, or `undefined` if there is no `<Form>` ancestor.
+	 *
+	 * Like `getContext`, this must be called during component initialisation. Hold the result and
+	 * read off it later — the remote form's own properties (`pending`, `result`, `fields`) are
+	 * reactive, so reading them in your markup stays up to date.
+	 */
+	// Typed as a full `RemoteForm` rather than `AnyRemoteForm` so that callers keep the field typings
+	// they had before — `AnyRemoteForm` is deliberately loose, and only exists to bound `action`.
 	function getFormContext() {
 		const formContext = getContext(FORM_CONTEXT_KEY) as () => RemoteForm<any, any> | undefined
 		return formContext ? formContext() : undefined
 	}
 
-	function getInputErrors(name: string) {
+	/**
+	 * A getter for the validation issues on one field, for building your own field wrapper.
+	 *
+	 * Call this during component initialisation and call the getter it returns wherever you need the
+	 * issues — the read is reactive, so it re-runs as the field is validated:
+	 *
+	 * ```js
+	 * // in your wrapper's <script>, at the top level
+	 * const errors = getInputErrors(name)
+	 * ```
+	 *
+	 * ```svelte
+	 * {#if errors()}
+	 *   <p>{errors()!.map((e) => e.message).join(', ')}</p>
+	 * {/if}
+	 * ```
+	 */
+	function getInputErrors(name: string): () => RemoteFormIssue[] | undefined {
+		// The context is read here, at init, where it is legal to do so. Only the `issues()` call is
+		// deferred into the getter, which is what makes the result reactive.
 		const formContext = getFormContext()
-		return formContext?.fields[name]?.issues()
+		return () => formContext?.fields[name]?.issues()
 	}
 
-	export { getFormContext, getInputErrors }
+	/**
+	 * Warn, in dev only, about a field that has no `<Form>` ancestor. Standalone use is supported,
+	 * so this is opt-out via the `standalone` prop rather than always-on.
+	 */
+	function warnMissingForm(component: 'Input' | 'Select', name: string) {
+		if (!DEV) return
+
+		console.warn(
+			`[sv-forms] <${component} name="${name}" /> has no <Form> ancestor, so it is not wired to ` +
+				`a remote form field: no validation, no aria-invalid, no name coercion and no reset ` +
+				`value. If that is intentional, pass \`standalone\` to silence this.`
+		)
+	}
+
+	export { getFormContext, getInputErrors, warnMissingForm }
 </script>
 
-<script lang="ts" generics="T extends RemoteForm<any, any>">
-	let { ref = $bindable(), children, action, ...props }: BaseFormProps<T> = $props()
+<script lang="ts" generics="T extends AnyRemoteForm">
+	let {
+		ref = $bindable(),
+		children,
+		action,
+		// Destructured so they do not land on the <form> element via the spread below. `resetForm` and
+		// `removeDefaultEnhance` would render as bogus attributes, and `onsuccess`/`onfailure` would
+		// register listeners for events that do not exist.
+		onsuccess,
+		onfailure,
+		enhance,
+		removeDefaultEnhance,
+		resetForm,
+		...props
+	}: BaseFormProps<T> = $props()
 
 	setContext(FORM_CONTEXT_KEY, () => action)
 
-	const defaultEnhance: EnhanceFn = async ({ form, submit }) => {
+	const defaultEnhance: EnhanceFn<T> = async (form) => {
 		try {
-			await submit()
-			if (props?.resetForm) form.reset()
+			const success = await form.submit()
 
-			let issues = action.fields.allIssues()
-			if (issues?.length ?? 0 > 0) {
-				props?.onfailure?.(issues)
-			} else {
-				props?.onsuccess?.(action.result)
+			if (!success) {
+				onfailure?.(form.fields.allIssues())
+				return
 			}
+
+			if (resetForm) form.element.reset()
+
+			onsuccess?.(action.result)
 		} catch (error) {
-			props?.onfailure?.(error)
+			onfailure?.(error)
 		}
 	}
 
 	let formAction = $derived.by(() => {
-		if (props?.removeDefaultEnhance) return action
+		if (removeDefaultEnhance) return action
 
-		const enhanceFn = props?.enhance ?? defaultEnhance
+		const enhanceFn = enhance ?? defaultEnhance
 
 		return action?.enhance(enhanceFn)
 	})
 </script>
 
 <form bind:this={ref} {...props} {...formAction}>
-	{@render children()}
+	{@render children(action)}
 </form>
