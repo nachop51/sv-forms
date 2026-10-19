@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Form } from '$lib/index.js'
+	import { Form } from '#lib/index.js'
 	import ExampleInput from '../demo/example-input.svelte'
 	import { exampleAction } from './data.remote.ts'
 

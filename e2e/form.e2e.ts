@@ -5,7 +5,7 @@ test('onfailure receives validation issues, onsuccess resets to the field defaul
 }) => {
 	await page.goto('/')
 
-	const input = page.locator('input[name="name"]')
+	const input = page.getByRole('textbox', { name: 'Name' })
 	const submit = page.locator('button[type="submit"]')
 
 	// `defaultValue` arrives after mount, so it has to be picked up reactively
@@ -28,7 +28,7 @@ test('onfailure receives validation issues, onsuccess resets to the field defaul
 test('a native reset reverts to the field default, not to what was typed', async ({ page }) => {
 	await page.goto('/')
 
-	const input = page.locator('input[name="name"]')
+	const input = page.getByRole('textbox', { name: 'Name' })
 	await expect(input).toHaveValue('loaded later')
 
 	await input.fill('typed by hand')

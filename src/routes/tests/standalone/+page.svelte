@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Input, Select } from '$lib/index.js'
+	import { Input, Select } from '#lib/index.js'
 
 	// No <Form> ancestor, so there is no form context and the components fall back to plain
 	// elements. Everything a consumer passes has to survive that path untouched. `standalone`

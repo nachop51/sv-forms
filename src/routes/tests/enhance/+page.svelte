@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Form, Input } from '$lib/index.js'
+	import { Form, Input } from '#lib/index.js'
 	import { boom, echo } from '../tests.remote.ts'
 
 	let log = $state<string[]>([])

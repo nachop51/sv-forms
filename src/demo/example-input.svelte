@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { BaseInputProps } from '$lib/components/input.svelte'
-	import Input from '$lib/components/input.svelte'
-	import { getInputErrors } from '$lib/components/form.svelte'
+	import type { BaseInputProps } from '#lib/components/input.svelte'
+	import Input from '#lib/components/input.svelte'
+	import { getInputErrors } from '#lib/components/form.svelte'
 
 	type UIInputProps = Omit<BaseInputProps, 'error'> & {
 		label?: string

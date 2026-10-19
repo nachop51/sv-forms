@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Form, Input, Select } from '$lib/index.js'
+	import { Form, Input, Select } from '#lib/index.js'
 	import { languages, plans, tags } from '../constants.ts'
 	import { submitFields } from '../tests.remote.ts'
 

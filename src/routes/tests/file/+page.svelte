@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Form, Input } from '$lib/index.js'
+	import { Form, Input } from '#lib/index.js'
 	import { uploadFile } from '../tests.remote.ts'
 
 	let result = $state<string | null>(null)

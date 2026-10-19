@@ -33,22 +33,20 @@ exempt from semver. Kit 2.61.0 — a _minor_ release — reshaped the `enhance` 
 `{ form, data, submit }` to a single form instance, and made accessing the old properties throw.
 That is the entire reason sv-forms `0.1.0` is a breaking release. Expect it to happen again.
 
-**Pin your Kit version.** A caret range like `^2.70.0` will happily pull the minor that breaks you.
+**Pin your Kit version.** A caret range like `^3.1.0` will happily pull the minor that breaks you.
 Pin exactly — no caret — or at least review Kit's changelog before bumping:
 
 ```json
 {
 	"devDependencies": {
-		"@sveltejs/kit": "2.70.3"
+		"@sveltejs/kit": "3.1.0"
 	}
 }
 ```
 
-**The peer range is capped at `>=2.61.0 <3`.** This is deliberate. When Kit 3 lands, npm will refuse
-to resolve rather than let you install a combination that half-works — which is the failure mode you
-want, because Kit 3 is already known to relocate the opt-in flags (see [Setup](#setup)) and may
-change the form API again. A release of sv-forms will widen the range once it has been tested
-against Kit 3.
+**The peer range is capped at `^3.0.0`.** This is deliberate. When Kit 4 lands, npm will refuse
+to resolve rather than let you install a combination that half-works. A release of sv-forms will
+widen the range once it has been tested against Kit 4.
 
 **The opt-in flags are yours to set, and they move.** sv-forms cannot enable remote functions for
 you, and their config location is not stable across Kit majors. See [Setup](#setup).
@@ -64,35 +62,27 @@ npm install sv-forms
 # or: bun add sv-forms / pnpm add sv-forms
 ```
 
-Requires `svelte@^5` and `@sveltejs/kit@>=2.61.0 <3` as peers.
+Requires `svelte@^5` and `@sveltejs/kit@^3` as peers. On Kit 2, use sv-forms 0.1.0.
 
 ## Setup
 
 Remote functions are opt-in. If you have not enabled them already, both of these flags are
-required in your **`svelte.config.js`** — the library cannot turn them on for you:
+required in the `sveltekit()` plugin options in your **`vite.config.js`** — the library cannot turn
+them on for you:
 
 ```js
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-	kit: {
-		experimental: {
-			remoteFunctions: true,
-		},
-	},
-	compilerOptions: {
-		experimental: {
-			async: true,
-		},
-	},
-}
+import { defineConfig } from 'vite'
+import { sveltekit } from '@sveltejs/kit/vite'
 
-export default config
+export default defineConfig({
+	plugins: [
+		sveltekit({
+			compilerOptions: { experimental: { async: true } },
+			experimental: { remoteFunctions: true },
+		}),
+	],
+})
 ```
-
-> [!NOTE]
-> SvelteKit 3 is expected to move this opt-in into `vite.config.js`, under the `sveltekit()`
-> plugin. Check the [remote functions docs](https://svelte.dev/docs/kit/remote-functions) for the
-> location that matches your version.
 
 ## Quick start
 
@@ -337,6 +327,15 @@ to say you meant it:
 
 The warning is stripped from production builds. Note that without a field there is no validation,
 no `aria-invalid`, and no `n:`/`b:` name coercion — plain string values only.
+
+## Migrating to 0.2.0
+
+**Requires `@sveltejs/kit` 3.** No API changes in sv-forms itself; the types it builds on moved from
+`@sveltejs/kit` to `$app/server` in Kit 3. Move your remote functions opt-in into `vite.config.js`
+(see [Setup](#setup)) and follow the [Kit 3 migration guide](https://svelte.dev/docs/kit/migrating-to-sveltekit-3).
+
+Kit 3 suffixes a form field's `name` with the form's id (`note/<id>`), so selectors like
+`input[name="note"]` in your tests no longer match inside a `<Form>`. Select by label or test id.
 
 ## Migrating to 0.1.0
 

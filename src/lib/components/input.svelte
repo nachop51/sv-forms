@@ -1,7 +1,7 @@
 <script lang="ts">
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	import type { HTMLInputAttributes } from 'svelte/elements'
-	import type { RemoteFormField } from '@sveltejs/kit'
+	import type { RemoteFormField } from '$app/server'
 	import { getFormContext, warnMissingForm } from './form.svelte'
 
 	export type BaseInputProps = Omit<HTMLInputAttributes, 'type'> & {

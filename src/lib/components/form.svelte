@@ -1,9 +1,9 @@
 <script lang="ts" module>
 	import { getContext, setContext, type Snippet } from 'svelte'
 	import { DEV } from 'esm-env'
-	import type { RemoteForm, RemoteFormIssue } from '@sveltejs/kit'
+	import type { RemoteForm, RemoteFormIssue } from '$app/server'
 	import type { HTMLFormAttributes } from 'svelte/elements'
-	import { FORM_CONTEXT_KEY } from '$lib/consts.js'
+	import { FORM_CONTEXT_KEY } from '../consts.js'
 
 	/**
 	 * The bound for the `action` prop: permissive enough to accept both a `RemoteForm` and the
