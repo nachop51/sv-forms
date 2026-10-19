@@ -54,7 +54,7 @@
 	const selectCtxFormProps = $derived.by(() => {
 		// Spreading evaluates the getters `as()` returns, which keeps them tracked here.
 		const props: Record<string, any> = {
-			...formContext?.fields[name]?.as(type as any, fieldValue),
+			...(name && formContext?.fields[name]?.as(type as any, fieldValue)),
 		}
 
 		// A select the user hasn't touched has no field value yet. Applying `value: undefined` would

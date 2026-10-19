@@ -35,6 +35,8 @@
 	/>
 	<Input name="count" type="number" defaultValue={7} data-testid="count" />
 	<Input name="subscribe" type="checkbox" data-testid="subscribe" />
+	<!-- UI-only input with no name: must not post anything (Kit 3 rejects unbound names) -->
+	<Input name="" type="text" data-testid="nameless" />
 
 	{#each plans as plan (plan)}
 		<label>

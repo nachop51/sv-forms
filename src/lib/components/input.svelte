@@ -47,7 +47,11 @@
 		OPTION_VALUE_TYPES.includes(type) ? value : (defaultValue ?? initialValue)
 	)
 
-	const inputCtxFormProps = $derived(formContext?.fields[name]?.as(type as any, fieldValue) ?? {})
+	// A nameless input is UI state, not a field: Kit 3's `as()` would still mint `/<formId>` for it,
+	// which fails the submission.
+	const inputCtxFormProps = $derived(
+		(name && formContext?.fields[name]?.as(type as any, fieldValue)) || {}
+	)
 </script>
 
 {#if type === 'file'}

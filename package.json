@@ -1,6 +1,6 @@
 {
 	"name": "sv-forms",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Thin Svelte components over SvelteKit remote form functions: <Form>, <Input> and <Select> wired to a form's fields, issues and result.",
 	"license": "MIT",
 	"repository": {
